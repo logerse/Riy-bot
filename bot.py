@@ -15,7 +15,6 @@ bot.remove_command('help')
 connection = sqlite3.connect('serv')
 cursor = connection.cursor()
 
-flag = 0
 
 @bot.event
 async def on_ready():
@@ -212,7 +211,7 @@ async def __leaderboardlvl(ctx):
 	)
 	await ctx.send(embed = embed)
 
-
+flag = 0
 @bot.command (aliases =['timely'])
 async def __timely (ctx):
         #---------#
@@ -229,10 +228,13 @@ async def __timely (ctx):
         #---------#
 	global flag
 	if flag:
-		await __faill__timely(ctx)
-		return
+		if ctx.author.id == flag:
+			await __faill__timely(ctx)
+			return
+		else:
+			return
 
-	flag = 1
+	flag = ctx.author.id
 	if datetime.datetime.now() >= getTime(ctx.author.id):
 		await ctx.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, Вы получили награду :heart:"))
 		cursor.execute("UPDATE users SET cash = cash + 1000 WHERE id = {}".format(ctx.author.id))
