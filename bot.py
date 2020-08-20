@@ -293,37 +293,61 @@ async def __help(ctx):
 		 """,
 		))
 
+#----#
+def strToInt(x):
+	err = 0
+	sign = 1
+	i = 0
+	x = list(x)
+	while x[i] == '+' or x[i] == '-':
+		if x[i] == '-':
+			sign *= -1
+		i += 1
+
+	if not ''.join(x[i:]).isdigit():
+		return [0, 1]
+	else:
+		return [int(''.join(x[i:]))* sign, 0]	
+#----#
+
 random.seed(int(datetime.datetime.now().timestamp()))
 @bot.command(aliases= ['bf'])
-async def __casino(ctx, playerChoice, bet = None):
+async def __casino(ctx, playerChoice = None, bet = None):
 	var = ["t", "h"]
+
 	if playerChoice not in var:
-		await ctx.send(f"Ошибка")
+		await ctx.send(f"Синтаксис команды: .bf {{h|t}} [bet]")
 		return
 
-	if bet == 'all':
+	if bet is None:
+		await ctx.send(f"Ваша ставка сыграет по дефолту(1% от вашего банка)")
+		cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id))
+		bet = int(cursor.fetchone()[0] * 0.01)
+	elif bet == 'all':
 		cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id))
 		bet = int(cursor.fetchone()[0])
-	elif len([i for i in bet if not i.isdigit() and i != '-']):
-                await ctx.send(f'Ставка может быть только числом!')
-                return
-	elif not bet or bet == '0':
-		await ctx.send(f"Ваша ставка сыграет по дефолту(1% от вашего банка.") 
-		cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id))
-		bet = int(cursor.fetchone()[0] * 0.01) 
-	elif int(bet) < 0:
-		await ctx.send(f"Ай-ай-ай, нельзя использовать отрицательные числа.") 
-		return
-	if int(bet) > int(cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id)).fetchone()[0]):
-		await ctx.send(f"**{ctx.author}**, у Вас недостаточно сердечек для ставки")
-		return
-	result = random.choice(var)
-	if playerChoice == result:
-		await ctx.send(f"**{ctx.author}**, угадал! +{bet} сердечек")
-		cursor.execute("UPDATE users SET cash = cash + {} WHERE id = {}".format(bet, ctx.author.id))
 	else:
-		await ctx.send(f"**{ctx.author}**, НЕ угадал! -{bet} сердечек")
-		cursor.execute("UPDATE users SET cash = cash - {} WHERE id = {}".format(bet, ctx.author.id))
+		result = strToInt(bet)
+		if result[1]:
+			await ctx.send(f'Ставка может быть только числом!')
+			return
+		elif result[0] <= 0:
+			await ctx.send(f"Ай-ай-ай, ставка может быть только натуральным числом.")
+			return
+		elif result[0] > int(cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id)).fetchone()[0]):
+			await ctx.send(f"**{ctx.author}**, у Вас недостаточно сердечек для ставки")
+			return
+		else:
+			bet = result[0]
+
+
+	result = random.choice(var)
+
+	resultOperation = '-'
+	if playerChoice == result: resultOperation = '+'
+
+	await ctx.send(f"**{ctx.author}**, угадал! {resultOperation}{bet} сердечек")
+	cursor.execute("UPDATE users SET cash = cash {} {} WHERE id = {}".format(resultOperation, bet, ctx.author.id))
 
 	connection.commit()
 
