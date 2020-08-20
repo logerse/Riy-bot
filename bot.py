@@ -15,12 +15,10 @@ bot.remove_command('help')
 connection = sqlite3.connect('serv')
 cursor = connection.cursor()
 
-time = datetime.datetime.now()
 flag = 0
 
 @bot.event
 async def on_ready():
-	global time
 	await bot.change_presence(status = discord.Status.online, activity = discord.Game('Размышление о мире') )
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS users (
@@ -30,7 +28,8 @@ async def on_ready():
 		rep INT,
 		lvl INT,
 		server_id INT,
-		xp INT
+		xp INT,
+                time_ INT
 		)""")
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS shop (
@@ -43,7 +42,7 @@ async def on_ready():
 	for guild in bot.guilds:
 		for member in guild.members:
 			if cursor.execute(f"SELECT id FROM users WHERE id = {member.id}") .fetchone() is None:
-				cursor.execute(f"INSERT INTO users VALUES ('{member}', {member.id}, 0,0,1, {guild.id}, 0)")
+				cursor.execute(f"INSERT INTO users VALUES ('{member}', {member.id}, 0,0,1, {guild.id}, 0, 0)")
 			else:
 				pass
 
@@ -53,7 +52,7 @@ print ('Успешно')
 @bot.event
 async def on_member_join(member):
 	if cursor.execute(f"SELECT id FROM users WHERE id = {member.id}") .fetchone() is None:
-		cursor.execute(f"INSERT INTO users VALUES ('{member}', {member.id}, 0,0,1, {member.guild.id},0)")
+		cursor.execute(f"INSERT INTO users VALUES ('{member}', {member.id}, 0,0,1, {member.guild.id},0, 0)")
 	connection.commit()
 	pass
 
@@ -213,32 +212,23 @@ async def __leaderboardlvl(ctx):
 	)
 	await ctx.send(embed = embed)
 
-#@bot.event
-#async def on_message(message):
-#	cursor.execute("UPDATE users SET cash = cash + 0 WHERE id = {}".format(message.author.id))
-#	connection.commit()
-#
-#	await bot.process_commands(message)
-
-
 @bot.command (aliases =['timely'])
 async def __timely (ctx):
-	global time
 	global flag
 	if flag: return
 	flag = 1
-	if datetime.datetime.now() >= time:
+	if datetime.datetime.now() >= getTime(ctx.author.id):
 		await ctx.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, Вы получили награду :heart:"))
 		cursor.execute("UPDATE users SET cash = cash + 1000 WHERE id = {}".format(ctx.author.id))
 		connection.commit()
 		await ctx.message.add_reaction('✔')
-		time = datetime.datetime.now() + datetime.timedelta(minutes=11)
+		setTime(ctx.author.id, datetime.datetime.now() + datetime.timedelta(minutes=11))
 	else:
 		def formatTime(totalSeconds : int):
 			return {'hours': str(int(totalSeconds // 3600)).zfill(2),
 					'minutes': str(int((totalSeconds % 3600) // 60)).zfill(2),
 					'seconds': str(int((totalSeconds % 60)//1)).zfill(2)}
-		timeLeft = time - datetime.datetime.now()
+		timeLeft = getTime(ctx.author.id) - datetime.datetime.now()
 		timeLeft = formatTime(timeLeft.total_seconds())
 		print(timeLeft.keys())
 		await ctx.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, до новых сердец осталось{timeLeft['hours']}:{timeLeft['minutes']}:{timeLeft['seconds']} :heart:"))
@@ -330,6 +320,16 @@ async def __casino(ctx, playerChoice, bet = None):
 #@bot.command(aliases= )
 
 
+#------------------#
+def getTime(usr_ID):
+    cursor.execute("SELECT time FROM users WHERE id = {}".format(usr_ID))
+    return datetime.datetime.fromtimestamp(int(cursor.fetchone()[0]))
+
+def setTime(usr_ID, dt=datetime.datetime.now()):
+    seconds = int(dt.timestamp())
+    cursur.execute("UPDATE users SET time = {} WHERE id = {}".format(seconds, usr_ID))
+    connection.commit()
+#------------------#
 
 
 
