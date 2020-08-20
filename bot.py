@@ -307,7 +307,7 @@ async def __casino(ctx, playerChoice, bet = None):
 	elif not bet.isdigit():
                 await ctx.send(f'Ставка может быть только числом!')
                 return
-	elif not bet:
+	elif not bet or bet == '0':
 		await ctx.send(f"Ваша ставка сыграет по дефолту(1% от вашего банка.") 
 		cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id))
 		bet = int(cursor.fetchone()[0] * 0.01) 
