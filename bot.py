@@ -212,10 +212,29 @@ async def __leaderboardlvl(ctx):
 	)
 	await ctx.send(embed = embed)
 
+#-------------------------------#
+async def 
+#-------------------------------#
+
 @bot.command (aliases =['timely'])
 async def __timely (ctx):
+        #---------#
+	def formatTime(totalSeconds : int):
+	    return {'hours': str(int(totalSeconds // 3600)).zfill(2),
+		    'minutes': str(int((totalSeconds % 3600) // 60)).zfill(2),
+		    'seconds': str(int((totalSeconds % 60)//1)).zfill(2)}
+        #----#
+        def __fail__timely(ctx_):
+		timeLeft = getTime(ctx_.author.id) - datetime.datetime.now()
+		timeLeft = formatTime(timeLeft.total_seconds())
+		await ctx_.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, до новых сердец осталось{timeLeft['hours']}:{timeLeft['minutes']}:{timeLeft['seconds']} :heart:"))
+		await ctx_.message.add_reaction('❌')
+        #---------#
 	global flag
-	if flag: return
+	if flag:
+            __fail__timely(ctx)
+            return
+
 	flag = 1
 	if datetime.datetime.now() >= getTime(ctx.author.id):
 		await ctx.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, Вы получили награду :heart:"))
@@ -224,15 +243,7 @@ async def __timely (ctx):
 		await ctx.message.add_reaction('✔')
 		setTime(ctx.author.id, datetime.datetime.now() + datetime.timedelta(minutes=11))
 	else:
-		def formatTime(totalSeconds : int):
-			return {'hours': str(int(totalSeconds // 3600)).zfill(2),
-					'minutes': str(int((totalSeconds % 3600) // 60)).zfill(2),
-					'seconds': str(int((totalSeconds % 60)//1)).zfill(2)}
-		timeLeft = getTime(ctx.author.id) - datetime.datetime.now()
-		timeLeft = formatTime(timeLeft.total_seconds())
-		print(timeLeft.keys())
-		await ctx.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, до новых сердец осталось{timeLeft['hours']}:{timeLeft['minutes']}:{timeLeft['seconds']} :heart:"))
-		await ctx.message.add_reaction('❌')
+                __fail__timely(ctx)
 	flag = 0
 @bot.event
 async def on_message(message):
