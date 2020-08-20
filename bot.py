@@ -221,7 +221,7 @@ async def __timely (ctx):
 		    'minutes': str(int((totalSeconds % 3600) // 60)).zfill(2),
 		    'seconds': str(int((totalSeconds % 60)//1)).zfill(2)}
         #----#
-	async def __fail__timely(ctx_):
+	async def __faill__timely(ctx_):
 		timeLeft = getTime(ctx_.author.id) - datetime.datetime.now()
 		timeLeft = formatTime(timeLeft.total_seconds())
 		await ctx_.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, до новых сердец осталось{timeLeft['hours']}:{timeLeft['minutes']}:{timeLeft['seconds']} :heart:"))
@@ -229,7 +229,7 @@ async def __timely (ctx):
         #---------#
 	global flag
 	if flag:
-		__fail__timely(ctx)
+		await __faill__timely(ctx)
 		return
 
 	flag = 1
@@ -240,7 +240,7 @@ async def __timely (ctx):
 		await ctx.message.add_reaction('✔')
 		setTime(ctx.author.id, datetime.datetime.now() + datetime.timedelta(minutes=11))
 	else:
-		__fail__timely(ctx)
+		await __faill__timely(ctx)
 	flag = 0
 @bot.event
 async def on_message(message):
@@ -330,12 +330,12 @@ async def __casino(ctx, playerChoice, bet = None):
 
 #------------------#
 def getTime(usr_ID):
-    cursor.execute("SELECT time FROM users WHERE id = {}".format(usr_ID))
+    cursor.execute("SELECT time_ FROM users WHERE id = {}".format(usr_ID))
     return datetime.datetime.fromtimestamp(int(cursor.fetchone()[0]))
 
 def setTime(usr_ID, dt=datetime.datetime.now()):
     seconds = int(dt.timestamp())
-    cursur.execute("UPDATE users SET time = {} WHERE id = {}".format(seconds, usr_ID))
+    cursor.execute("UPDATE users SET time_ = {} WHERE id = {}".format(seconds, usr_ID))
     connection.commit()
 #------------------#
 
