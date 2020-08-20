@@ -304,7 +304,7 @@ async def __casino(ctx, playerChoice, bet = None):
 	if bet == 'all':
 		cursor.execute("SELECT cash FROM users WHERE id = {}".format(ctx.author.id))
 		bet = int(cursor.fetchone()[0])
-	elif len([i for i in bet if not i.isdigit() or i != '-']):
+	elif len([i for i in bet if not i.isdigit() and i != '-']):
                 await ctx.send(f'Ставка может быть только числом!')
                 return
 	elif not bet or bet == '0':
