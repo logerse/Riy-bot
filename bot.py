@@ -221,7 +221,7 @@ async def __timely (ctx):
 		    'minutes': str(int((totalSeconds % 3600) // 60)).zfill(2),
 		    'seconds': str(int((totalSeconds % 60)//1)).zfill(2)}
         #----#
-        def __fail__timely(ctx_):
+	async def __fail__timely(ctx_):
 		timeLeft = getTime(ctx_.author.id) - datetime.datetime.now()
 		timeLeft = formatTime(timeLeft.total_seconds())
 		await ctx_.send(embed =discord.Embed(color = 0xff1220,title = 'Награда', description =f"**{ctx.author}**, до новых сердец осталось{timeLeft['hours']}:{timeLeft['minutes']}:{timeLeft['seconds']} :heart:"))
@@ -229,8 +229,8 @@ async def __timely (ctx):
         #---------#
 	global flag
 	if flag:
-            __fail__timely(ctx)
-            return
+		__fail__timely(ctx)
+		return
 
 	flag = 1
 	if datetime.datetime.now() >= getTime(ctx.author.id):
@@ -240,7 +240,7 @@ async def __timely (ctx):
 		await ctx.message.add_reaction('✔')
 		setTime(ctx.author.id, datetime.datetime.now() + datetime.timedelta(minutes=11))
 	else:
-                __fail__timely(ctx)
+		__fail__timely(ctx)
 	flag = 0
 @bot.event
 async def on_message(message):
