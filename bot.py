@@ -212,9 +212,6 @@ async def __leaderboardlvl(ctx):
 	)
 	await ctx.send(embed = embed)
 
-#-------------------------------#
-async def 
-#-------------------------------#
 
 @bot.command (aliases =['timely'])
 async def __timely (ctx):
